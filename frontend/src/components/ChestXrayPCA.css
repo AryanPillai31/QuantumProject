@@ -1,0 +1,242 @@
+/* Wrapper handles overall page layout & scrolling */
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: linear-gradient(120deg, #030616 0%, #1c1a44 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* ===== Navbar ===== */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  }
+  
+  .navbar-logo {
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  
+  .navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+  }
+  .navbar-links li {
+    margin: 0;
+  }
+  .navbar-links a {
+    color: #dcdcdc;
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    transition: color 0.2s;
+  }
+  .navbar-links a:hover {
+    color: #ffffff;
+  }
+  
+  /* ===== Hero Section ===== */
+  .hero-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 2rem;
+    background: url('https://images.unsplash.com/photo-1559757175-570d48a644a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80')
+      center/cover no-repeat;
+    min-height: 50vh;
+    text-align: center;
+  }
+  .hero-content {
+    max-width: 700px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2rem;
+    border-radius: 8px;
+  }
+  .hero-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+    color: #f0f0f0;
+    line-height: 1.5;
+  }
+  
+  /* ===== Workflow Section ===== */
+  .workflow-section {
+    background: #f5f5f5;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    color: #333;
+  }
+  .workflow-steps {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+  }
+  .workflow-step {
+    max-width: 300px;
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .workflow-step h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #111;
+  }
+  .workflow-step p {
+    font-size: 0.95rem;
+    color: #444;
+    line-height: 1.4;
+  }
+  
+  /* ===== Analysis Section ===== */
+  .analysis-section {
+    background: #e8eaf6;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .analysis-subtitle {
+    margin-top: 0.5rem;
+    color: #555;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .analysis-container {
+    display: flex;
+    justify-content: center;
+  }
+  .analysis-card {
+    background: #fafafa;
+    border-radius: 6px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Upload Box */
+  .upload-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px dashed #aaa;
+    border-radius: 6px;
+    padding: 1.5rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    background-color: #ffffff;
+  }
+  .upload-icon {
+    width: 40px;
+    height: 40px;
+    color: #666;
+  }
+  .upload-text {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  .hidden-input {
+    display: none;
+  }
+  
+  /* Preview */
+  .image-preview {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  .preview-img {
+    max-width: 200px;
+    border-radius: 6px;
+    border: 2px solid #ccc;
+    margin-bottom: 1rem;
+  }
+  
+  /* Analyze Button */
+  .analyze-button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: #5e35b1;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+  }
+  .analyze-button:hover {
+    background-color: #512da8;
+  }
+  .loading-text {
+    text-align: center;
+    margin-top: 1rem;
+    color: #555;
+  }
+  
+  /* ===== Info Section ===== */
+  .info-section {
+    background: #ffffff;
+    padding: 3rem 2rem;
+    color: #333;
+    text-align: center;
+  }
+  .info-text {
+    max-width: 700px;
+    margin: 0.5rem auto 1rem auto;
+    line-height: 1.6;
+    color: #555;
+  }
+  
+  /* ===== Footer ===== */
+  .footer {
+    background: #1c1a44;
+    color: #ffffff;
+    text-align: center;
+    padding: 1rem;
+    margin-top: auto;
+  }
+  .footer-text {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .navbar-links {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .workflow-steps {
+      flex-direction: column;
+      align-items: center;
+    }
+    .analysis-container {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+  
