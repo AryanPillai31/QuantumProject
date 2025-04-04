@@ -1,0 +1,31 @@
+.image-section {
+    position: relative;
+    text-align: center;
+    margin:  0;
+    padding-bottom: 2rem;
+  }
+  
+  .image-section img {
+    max-width: 80%;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .social-icons {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .social-icons a {
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
+  .social-icons a:hover {
+    color: #0072b1;
+  }
+  

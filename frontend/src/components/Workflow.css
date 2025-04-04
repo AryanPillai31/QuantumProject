@@ -1,0 +1,19 @@
+.workflow-section {
+    background-color: #f1f2f9;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  
+  .workflow-section h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+  }
+  
+  .workflow-image img {
+    max-width: 1000px;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  

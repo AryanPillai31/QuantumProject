@@ -1,0 +1,119 @@
+.dataset-section {
+    background-color: #f1f2f9;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  
+  .dataset-section h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+  }
+  
+  /* 🔲 Outer white card */
+  .dataset-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 15px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  
+  /* Inside content (flex layout) */
+  .dataset-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 3rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  
+  /* Image style */
+  .dataset-image img {
+    width: 400px;
+    max-width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Info card */
+  .dataset-info {
+    max-width: 500px;
+    text-align: left;
+  }
+  
+  .dataset-info ul {
+    padding-left: 1rem;
+  }
+  
+  .dataset-info li {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+  .qm-health-intro {
+    background: white;
+    padding: 2rem 2.5rem;
+    margin: 0 auto 2rem auto;
+    max-width: 1100px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    text-align: center;
+  }
+  
+  .qm-health-intro h3 {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .qm-health-intro p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #333;
+  }
+  .qm-health-hero {
+    position: relative;
+    width: 90%;
+    max-width: 1500px;
+    height: 600px; /* increased height */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 15px;
+    margin: 0 auto 4rem auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+  
+  
+  .qm-health-overlay {
+    position:relative;
+    top: -120px; /* lift the box over the image */
+    margin: 0 auto;
+    width: 120%;
+    max-width: 1200px;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+  }
+  
+  
+  .qm-health-overlay h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .qm-health-overlay p {
+    font-size: 1rem;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+  }
+  
