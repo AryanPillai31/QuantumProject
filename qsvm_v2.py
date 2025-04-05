@@ -1,70 +1,126 @@
 import time
-from sklearn.datasets import load_digits
-from sklearn.model_selection import train_test_split
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
-import matplotlib.pyplot as plt
+import os
+import json
+from sklearn.metrics import f1_score, precision_score, recall_score, confusion_matrix
+from datetime import datetime
+from pymongo import MongoClient
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.metrics import accuracy_score
 from qiskit.circuit.library import ZZFeatureMap
 from qiskit_machine_learning.kernels import FidelityQuantumKernel
-from qiskit.primitives import Sampler
-from qiskit_machine_learning.state_fidelities import ComputeUncompute
 from qiskit.primitives import StatevectorSampler
-# Load the digits dataset
-digits = load_digits(n_class=2)
-fig, axs = plt.subplots(1, 2, figsize=(6,3))
-axs[0].set_axis_off()
-axs[0].imshow(digits.images[0], cmap=plt.cm.gray_r, interpolation='nearest')
-axs[1].set_axis_off()
-axs[1].imshow(digits.images[1], cmap=plt.cm.gray_r, interpolation='nearest')
-plt.show()
+from qiskit_machine_learning.state_fidelities import ComputeUncompute
 
-# Split dataset
-sample_train, sample_test, label_train, label_test = train_test_split(
-    digits.data, digits.target, test_size=0.2, random_state=22
-)
+# Function to load preprocessed data
+def load_preprocessed_data(folder, samples_per_class=15):
+    X_pca = np.load(os.path.join(folder, "X_pca.npy"))
+    labels = np.load(os.path.join(folder, "labels.npy"))
+    
+    # Select samples_per_class from each class
+    class_0_indices = np.where(labels == 0)[0][:samples_per_class]
+    class_1_indices = np.where(labels == 1)[0][:samples_per_class]
+    selected_indices = np.concatenate([class_0_indices, class_1_indices])
+    
+    return X_pca[selected_indices], labels[selected_indices]
 
-# Reduce dimensions
-n_dim = 4
-pca = PCA(n_components=n_dim).fit(sample_train)
-sample_train = pca.transform(sample_train)
-sample_test = pca.transform(sample_test)
+dataset_path = "preprocessed_xrays"
 
-# Normalize
-std_scale = StandardScaler().fit(sample_train)
-sample_train = std_scale.transform(sample_train)
-sample_test = std_scale.transform(sample_test)
+samples_size = 40
 
-# Scale
-samples = np.append(sample_train, sample_test, axis=0)
+# Load balanced preprocessed train and test data
+X_train, y_train = load_preprocessed_data(f"{dataset_path}/train", samples_per_class=samples_size // 2)
+X_test, y_test = load_preprocessed_data(f"{dataset_path}/test", samples_per_class=samples_size // 2)
+
+# Limit to samples_size samples each for quick testing
+X_train, y_train = X_train[:samples_size], y_train[:samples_size]
+X_test, y_test = X_test[:samples_size], y_test[:samples_size]
+
+# Map labels before training
+y_train = np.where(y_train == 0, -1, 1)
+y_test = np.where(y_test == 0, -1, 1)
+
+print(f"Using {len(X_train)} training samples and {len(X_test)} test samples.")
+
+# Normalize (Standardization + MinMax Scaling)
+std_scale = StandardScaler().fit(X_train)
+X_train = std_scale.transform(X_train)
+X_test = std_scale.transform(X_test)
+
+samples = np.append(X_train, X_test, axis=0)
 minmax_scale = MinMaxScaler((-1, 1)).fit(samples)
-sample_train = minmax_scale.transform(sample_train)
-sample_test = minmax_scale.transform(sample_test)
+X_train = minmax_scale.transform(X_train)
+X_test = minmax_scale.transform(X_test)
 
-# Select
-train_size = 100
-sample_train = sample_train[:train_size]
-label_train = label_train[:train_size]
+# Set feature map dimension dynamically based on input size
+feature_dim = X_train.shape[1]
+map_zz = ZZFeatureMap(feature_dimension=feature_dim, reps=2, entanglement='linear', insert_barriers=True)
 
-test_size = 20
-sample_test = sample_test[:test_size]
-label_test = label_test[:test_size]
-print(len(sample_train))
-map_zz = ZZFeatureMap(feature_dimension=4, reps=2, entanglement='linear', insert_barriers=True)
-encode_circuit = map_zz.assign_parameters(sample_train[0])
-
-# Define a sampler
+# Define a quantum sampler and fidelity
 sampler = StatevectorSampler()
-
-# Use ComputeUncompute fidelity method
 fidelity = ComputeUncompute(sampler=sampler)
 quantum_kernel = FidelityQuantumKernel(feature_map=map_zz, fidelity=fidelity)
 
-# Compute kernel matrix
-start_time = time.time()  # Start timer
-kernel_matrix = quantum_kernel.evaluate(sample_train[:50])  # Run the function
-end_time = time.time()  # End timer
+# Compute Kernel Matrices
+print("\nComputing quantum kernel matrices...")
+start_time = time.time()
 
-execution_time = end_time - start_time  # Calculate time taken
-print(f"Execution Time: {execution_time:.4f} seconds")
-encode_circuit.decompose().draw(output="mpl")
+kernel_matrix_train = quantum_kernel.evaluate(X_train)
+kernel_matrix_test = quantum_kernel.evaluate(X_test, X_train)
+
+end_time = time.time()
+print(f"Quantum Kernel Computation Time: {end_time - start_time:.4f} seconds")
+
+# Train SVM on Quantum Kernel
+print("\nTraining SVM classifier...")
+svm = SVC(kernel="precomputed")
+svm.fit(kernel_matrix_train, y_train)
+print("SVM training complete!")
+
+# Predict & Evaluate
+y_pred = svm.predict(kernel_matrix_test)
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Test Accuracy: {accuracy:.4f}")
+
+# Get dual coefficients (alpha * y)
+dual_coefs = svm.dual_coef_[0]  # shape: (n_support_vectors,)
+support_indices = svm.support_  # indices of support vectors in training data
+support_vectors = X_train[support_indices]
+support_labels = y_train[support_indices]
+bias = svm.intercept_[0]
+
+# Prepare data as a list of dictionaries
+model_data = {
+    "model_name": "qsvm-chest-xray-v1",
+    "timestamp": datetime.utcnow().isoformat(),
+    "feature_dim": X_train.shape[1],
+    "training_samples": len(X_train),
+    "test_samples": len(X_test),
+    "num_support_vectors": len(support_vectors),
+    "bias": bias,
+    "support_vectors": [
+        {"a_y": float(dual_coefs[i]), "x": support_vectors[i].tolist()}
+        for i in range(len(support_vectors))
+    ],
+    "metrics": {
+        "accuracy": float(accuracy_score(y_test, y_pred)),
+        "f1_score": float(f1_score(y_test, y_pred)),
+        "precision": float(precision_score(y_test, y_pred)),
+        "recall": float(recall_score(y_test, y_pred)),
+        "confusion_matrix": confusion_matrix(y_test, y_pred).tolist()
+    }
+}
+
+# Connect to MongoDB (adjust URI as needed)
+client = MongoClient("mongodb://localhost:27017/")
+db = client["quantum_svm_db"]
+collection = db["svm_models"]
+
+# Clear old model
+collection.find_one_and_delete({"model_name": "qsvm-chest-xray-v1"})
+
+# Insert model data
+insert_result = collection.insert_one(model_data)
+
+print(f"Model saved to MongoDB with _id: {insert_result.inserted_id}")

@@ -7,6 +7,7 @@ import About from './components/About';
 import Dataset from './components/Dataset';
 import Workflow from './components/workflow';
 import ImageUpload from './components/ImageUpload';
+import ZZFeatureMap from './components/ZZFeatureMap';
 
 
 
@@ -21,6 +22,7 @@ function App() {
       <About />
       <Dataset />
       <Workflow />
+      <ZZFeatureMap />
       <ImageUpload />
     </div>
   );

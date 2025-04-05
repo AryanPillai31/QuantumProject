@@ -1,74 +1,80 @@
 import numpy as np
 import os
 import cv2
-from sklearn.datasets import fetch_olivetti_faces  
+import json
+from sklearn.decomposition import TruncatedSVD
 
-def load_custom_images(image_folder, image_size=(128, 128)):
+def load_images(image_folder, image_size=(128, 128)):
     image_data = []
+    labels = []
+    label_map = {}
+
+    print(f"Loading images from {image_folder}...")
+
+    for label_idx, label_name in enumerate(sorted(os.listdir(image_folder))):
+        label_path = os.path.join(image_folder, label_name)
+        if not os.path.isdir(label_path):
+            continue
+
+        label_map[label_idx] = label_name  
+        file_list = os.listdir(label_path)
+        print(f"Processing '{label_name}' ({len(file_list)} images)...")
+
+        for filename in file_list:
+            img_path = os.path.join(label_path, filename)
+            img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)  
+            if img is None:
+                print(f"Skipping {img_path}, unable to load.")
+                continue
+            
+            img_resized = cv2.resize(img, image_size)  
+            img_flattened = img_resized.flatten()  
+
+            image_data.append(img_flattened)
+            labels.append(label_idx)
+
+    print(f"Loaded {len(image_data)} images from {image_folder}")
+    return np.array(image_data), np.array(labels), label_map
+
+
+def apply_svd(X, n_components=10):
+    print(f"Applying Truncated SVD to reduce to {n_components} components...")
     
-    for filename in os.listdir(image_folder):
-        img_path = os.path.join(image_folder, filename)
-        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)  
-        img_resized = cv2.resize(img, image_size)  
-        img_flattened = img_resized.flatten()  
-        image_data.append(img_flattened)
+    svd = TruncatedSVD(n_components=n_components, random_state=42)
+    X_svd = svd.fit_transform(X)
 
-    return np.array(image_data)
-
-
-def load_builtin_dataset():
-    faces = fetch_olivetti_faces(shuffle=True, random_state=42)
-    return faces.data  
-
-
-def apply_pca(X, variance_threshold=0.95):
+    explained = svd.explained_variance_ratio_.sum()
+    print(f"Explained variance with {n_components} components: {explained:.4f}")
     
+    return X_svd
+
+
+def save_preprocessed_data(X_svd, labels, label_map, output_folder="preprocessed_data"):
+    os.makedirs(output_folder, exist_ok=True)
+    np.save(os.path.join(output_folder, "X_pca.npy"), X_svd)
+    np.save(os.path.join(output_folder, "labels.npy"), labels)
     
-    X_mean = np.mean(X, axis=0)
-    X_std = np.std(X, axis=0)
-    X_std[X_std == 0] = 1  
-    X_standardized = (X - X_mean) / X_std
+    with open(os.path.join(output_folder, "label_map.json"), "w") as f:
+        json.dump(label_map, f, indent=4)  
 
-    
-    cov_matrix = np.cov(X_standardized, rowvar=False)
-
-    
-    eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
-
-    
-    sorted_indices = np.argsort(eigenvalues)[::-1]  
-    eigenvalues = eigenvalues[sorted_indices]
-    eigenvectors = eigenvectors[:, sorted_indices]
-
-    
-    explained_variance_ratio = eigenvalues / np.sum(eigenvalues)
-    cumulative_variance = np.cumsum(explained_variance_ratio)
-
-    
-    n_components = np.argmax(cumulative_variance >= variance_threshold) + 1
-
-    print(f"Optimal number of components: {n_components}")
-
-    
-    top_eigenvectors = eigenvectors[:, :n_components]
-    X_pca = np.dot(X_standardized, top_eigenvectors)
-
-    return X_pca, n_components
+    print(f"Saved preprocessed data in {output_folder}")
 
 
+# Process train, test, val datasets
+paths = ["test", "train", "val"]
 
-use_builtin_dataset = True  
+for sub_path in paths:
+    folder_path = "chest_xray/" + sub_path
+    if not os.path.exists(folder_path):
+        print(f"Skipping {folder_path}, folder not found.")
+        continue
 
-if use_builtin_dataset:
-    print("Using built-in Olivetti Faces dataset.")
-    X_images = load_builtin_dataset()
-else:
-    print("Using custom X-ray images dataset.")
-    X_images = load_custom_images("path/to/xray_images")
+    X_images, y_labels, label_map = load_images(folder_path)
+    if len(X_images) == 0:
+        print(f"Skipping {folder_path}, no images found.")
+        continue
 
+    X_svd = apply_svd(X_images)
+    save_preprocessed_data(X_svd, y_labels, label_map, output_folder="preprocessed_xrays/" + sub_path)
 
-X_pca, n_components = apply_pca(X_images)
-
-
-print("Original shape:", X_images.shape)
-print(f"Reduced shape: {X_pca.shape} (using {n_components} components)")
+print("Preprocessing completed!")

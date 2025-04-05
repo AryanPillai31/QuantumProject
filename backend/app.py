@@ -1,15 +1,19 @@
 import base64
 import io
+import os
 import numpy as np
-from flask import Flask, request, jsonify
+from flask import Flask, request, send_file, jsonify
 from PIL import Image
-from model import QuantumSVMModel  # Your pre-trained model file
+from modules.zz_feature_map import generate_feature_map_image
+import joblib
+from preprocessors.digits import DigitPreprocessor
+from services import classifier
 
 app = Flask(__name__)
 
 # Create an instance of your model.
 # Assume it has already been trained elsewhere and saved or is pre-loaded.
-quantum_svm = QuantumSVMModel()
+# quantum_svm = QuantumSVMModel()
 # Optionally, load the pre-trained model from disk:
 # quantum_svm.load("model.pkl")
 
@@ -63,43 +67,29 @@ def extract_features(image_bytes):
     except Exception as e:
         raise ValueError("Error processing image: " + str(e))
 
-@app.route("/classify", methods=["POST"])
-def classify():
-    """
-    API endpoint that accepts an image file, extracts features using PCA,
-    and passes them to the model for classification. The model returns both the classification
-    and an image of the quantum circuit used during prediction.
-    
-    Expected form-data key: 'image'
-    """
-    if 'image' not in request.files:
-        return jsonify({"error": "No image file provided"}), 400
+@app.route("/classify/digits", methods=["POST"])
+def classify_route():
+    file = request.files["image"]
+    if not file:
+        return jsonify({"error": "No file uploaded"}), 400
 
-    image_file = request.files['image']
-    image_bytes = image_file.read()
+    # Ensure uploads folder exists
+    upload_folder = os.path.abspath("uploads")
+    os.makedirs(upload_folder, exist_ok=True)
 
-    try:
-        # Extract features from the uploaded image using PCA
-        features = extract_features(image_bytes)
-        # Reshape features to a 2D array (1 sample, N features)
-        features = features.reshape(1, -1)
+    # Save with absolute path
+    file_path = os.path.join(upload_folder, file.filename)
+    file.save(file_path)
 
-        # Call the model’s API. The method `predict_with_circuit` is assumed to return:
-        # (classification, quantum_circuit_image)
-        classification, circuit_image = quantum_svm.predict_with_circuit(features)
+    pca = joblib.load(os.path.join("models", "digits", 'pca_4.pkl'))
+    std = joblib.load(os.path.join("models", "digits", 'std_4.pkl'))
+    minmax = joblib.load(os.path.join("models", "digits", 'minmax_4.pkl'))
 
-        # Convert the quantum circuit image (PIL Image) to a base64 encoded string
-        buffered = io.BytesIO()
-        circuit_image.save(buffered, format="PNG")
-        circuit_img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    # Instantiate appropriate preprocessor
+    preprocessor = DigitPreprocessor(pca, std, minmax)  # load these models as needed
 
-        # Map the classification: 1 -> "yes", -1 -> "no"
-        result = "yes" if classification == 1 else "no"
-
-        # Return both the classification and the circuit image
-        return jsonify({"classification": result, "circuit_image": circuit_img_str})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    prediction = classifier.classify(file_path, preprocessor, "qsvm-digits-v1")
+    return jsonify({"prediction": prediction})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
