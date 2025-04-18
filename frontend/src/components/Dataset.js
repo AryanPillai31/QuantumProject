@@ -29,11 +29,11 @@ const Dataset = () => {
           </div>
           <div className="dataset-info">
             <ul>
-              <li><strong>Name:</strong> Tuberculosis (TB) Chest X-ray Dataset</li>
+              <li><strong>Name:</strong> Pneumonia Chest X-ray Dataset</li>
               <li><strong>Source:</strong> NIH & Shenzhen No.3 Hospital</li>
-              <li><strong>Size:</strong> 800+ images (400 normal, 400 TB positive)</li>
+              <li><strong>Size:</strong> 5863 images </li>
               <li><strong>Format:</strong> PNG/JPG with label annotations</li>
-              <li><strong>Use Case:</strong> Training SVM to detect TB-infected lungs</li>
+              <li><strong>Use Case:</strong> Training SVM to detect Pneumonia affected lungs</li>
               <li><strong>Preprocessing:</strong> Rescaling, normalization, grayscale conversion</li>
             </ul>
           </div>
