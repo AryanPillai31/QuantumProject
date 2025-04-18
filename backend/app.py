@@ -7,15 +7,14 @@ from PIL import Image
 from modules.zz_feature_map import generate_feature_map_image
 import joblib
 from preprocessors.digits import DigitPreprocessor
+from preprocessors.chest_xray import ChestXrayPreprocessor
+from preprocessors.brain_mri import BrainMriPreprocessor
 from services import classifier
+from flask_cors import CORS
+
 
 app = Flask(__name__)
-
-# Create an instance of your model.
-# Assume it has already been trained elsewhere and saved or is pre-loaded.
-# quantum_svm = QuantumSVMModel()
-# Optionally, load the pre-trained model from disk:
-# quantum_svm.load("model.pkl")
+CORS(app)  
 
 def apply_pca(X, variance_threshold=0.95):
     X_mean = np.mean(X, axis=0)
@@ -68,7 +67,7 @@ def extract_features(image_bytes):
         raise ValueError("Error processing image: " + str(e))
 
 @app.route("/classify/digits", methods=["POST"])
-def classify_route():
+def classify_digits():
     file = request.files["image"]
     if not file:
         return jsonify({"error": "No file uploaded"}), 400
@@ -89,6 +88,54 @@ def classify_route():
     preprocessor = DigitPreprocessor(pca, std, minmax)  # load these models as needed
 
     prediction = classifier.classify(file_path, preprocessor, "qsvm-digits-v1")
+    return jsonify({"prediction": prediction})
+
+@app.route("/classify/chestxray", methods=["POST"])
+def classify_chest_xray():
+    file = request.files["image"]
+    if not file:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    # Ensure uploads folder exists
+    upload_folder = os.path.abspath("uploads")
+    os.makedirs(upload_folder, exist_ok=True)
+
+    # Save with absolute path
+    file_path = os.path.join(upload_folder, file.filename)
+    file.save(file_path)
+
+    pca = joblib.load(os.path.join("models", "chest-xrays", 'pca.pkl'))
+    std = joblib.load(os.path.join("models", "chest-xrays", 'std.pkl'))
+    minmax = joblib.load(os.path.join("models", "chest-xrays", 'minmax.pkl'))
+
+    # Instantiate appropriate preprocessor
+    preprocessor = ChestXrayPreprocessor(pca, std, minmax)  # load these models as needed
+
+    prediction = classifier.classify(file_path, preprocessor, "qsvm-chest-xray-v1")
+    return jsonify({"prediction": prediction})
+
+@app.route("/classify/brainmri", methods=["POST"])
+def classify_brain_mri():
+    file = request.files["image"]
+    if not file:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    # Ensure uploads folder exists
+    upload_folder = os.path.abspath("uploads")
+    os.makedirs(upload_folder, exist_ok=True)
+
+    # Save with absolute path
+    file_path = os.path.join(upload_folder, file.filename)
+    file.save(file_path)
+
+    pca = joblib.load(os.path.join("models", "brain-mri", 'pca.pkl'))
+    std = joblib.load(os.path.join("models", "brain-mri", 'std.pkl'))
+    minmax = joblib.load(os.path.join("models", "brain-mri", 'minmax.pkl'))
+
+    # Instantiate appropriate preprocessor
+    preprocessor = BrainMriPreprocessor(pca, std, minmax)  # load these models as needed
+
+    prediction = classifier.classify(file_path, preprocessor, "qsvm-brain-mri-v1")
     return jsonify({"prediction": prediction})
 
 if __name__ == "__main__":
