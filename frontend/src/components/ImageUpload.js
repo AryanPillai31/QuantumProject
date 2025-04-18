@@ -5,24 +5,24 @@ import './ImageUpload.css';
 const ImageUpload = () => {
   const datasetMap = {
     'chest-x-rays': {
-      endpoint: 'chest-x-rays',
+      endpoint: 'chestxray',
       classes: {
         "-1": 'NORMAL',
         "1": 'PNEUMONIA',
       }
     },
-    'brain-tumor': {
-      endpoint: 'brain-tumor',
+    'brain-mri': {
+      endpoint: 'brainmri',
       classes: {
-        "-1": 'NORMAL',
-        "1": 'BRAIN TUMOR',
+        "1": 'NORMAL',
+        "-1": 'BRAIN TUMOR',
       }
     }
   }
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [dataset, setDataset] = useState('chest-x-rays');
-  const [prediction, setPrediction] = useState(datasetMap[dataset].classes["-1"]);
+  const [prediction, setPrediction] = useState('');
   const [loading, setLoading] = useState(false);
 
 
@@ -43,8 +43,9 @@ const ImageUpload = () => {
     formData.append('image', selectedImage); // Use 'image' as the key to match Flask
 
     try {
+      console.log("Hitting", `http://localhost:5000/classify/${datasetMap[dataset].endpoint}`)
       const response = await axios.post(
-        'http://localhost:5000/classify/chestxray',
+        `http://localhost:5000/classify/${datasetMap[dataset].endpoint}`,
         formData,
         {
           headers: {
@@ -53,7 +54,7 @@ const ImageUpload = () => {
         }
       );
       console.log(response.data.prediction);
-      setPrediction(response.data.prediction !== 1 ? "PNEUMONIA" : "NORMAL");
+      setPrediction(datasetMap[dataset].classes[response.data.prediction.toString()]);
     } catch (error) {
       console.error('Error during classification:', error);
       setPrediction('PNEUMONIA');
@@ -74,8 +75,8 @@ const ImageUpload = () => {
           value={dataset}
           onChange={handleDatasetChange}
         >
-          <option value="pneumonia">Chest X‑ray Pneumonia</option>
-          <option value="brainTumor">Brain Tumor MRI</option>
+          <option value="chest-x-rays">Chest X‑ray Pneumonia</option>
+          <option value="brain-mri">Brain Tumor MRI</option>
           {/* add more as needed */}
         </select>
       </div>
