@@ -22,14 +22,14 @@ const Dataset = () => {
       </div>
 
       <div className="dataset-card">
-        <h2>Dataset Used</h2>
+        <h2>Datasets Used</h2>
         <div className="dataset-content">
           <div className="dataset-image">
             <img src="/xray-sample.jpeg" alt="Chest X-ray sample" />
           </div>
           <div className="dataset-info">
             <ul>
-              <li><strong>Name:</strong> Tuberculosis (TB) Chest X-ray Dataset</li>
+              <li><strong>Name:</strong> Pneumonia Chest X-ray Dataset</li>
               <li><strong>Source:</strong> NIH & Shenzhen No.3 Hospital</li>
               <li><strong>Size:</strong> 800+ images (400 normal, 400 TB positive)</li>
               <li><strong>Format:</strong> PNG/JPG with label annotations</li>
@@ -39,6 +39,24 @@ const Dataset = () => {
           </div>
         </div>
       </div>
+      <div className="dataset-card">
+        
+      <div className="dataset-content">
+              <div className="dataset-image">
+                <img src="dataset-cover.jpg" alt="Brain Tumor MRI sample" />
+              </div>
+              <div className="dataset-info">
+                <ul>
+                  <li><strong>Name:</strong> Brain MRI Images for Brain Tumor Detection</li>
+                  <li><strong>Source:</strong> Kaggle Open Source Dataset</li>
+                  <li><strong>Size:</strong> 1311 images (Tumor / No Tumor)</li>
+                  <li><strong>Format:</strong> JPG/PNG with labeled classes</li>
+                  <li><strong>Use Case:</strong> Classification of brain MRI scans using QSVM</li>
+                  <li><strong>Preprocessing:</strong> Resizing, normalization, grayscale conversion, PCA</li>
+                </ul>
+              </div>
+            </div>
+          </div>
     </section>
   );
 };
