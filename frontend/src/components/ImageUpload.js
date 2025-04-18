@@ -2,11 +2,33 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './ImageUpload.css';
 
-
 const ImageUpload = () => {
+  const datasetMap = {
+    'chest-x-rays': {
+      endpoint: 'chest-x-rays',
+      classes: {
+        "-1": 'NORMAL',
+        "1": 'PNEUMONIA',
+      }
+    },
+    'brain-tumor': {
+      endpoint: 'brain-tumor',
+      classes: {
+        "-1": 'NORMAL',
+        "1": 'BRAIN TUMOR',
+      }
+    }
+  }
+
   const [selectedImage, setSelectedImage] = useState(null);
-  const [prediction, setPrediction] = useState('PNEUMONIA');
+  const [dataset, setDataset] = useState('chest-x-rays');
+  const [prediction, setPrediction] = useState(datasetMap[dataset].classes["-1"]);
   const [loading, setLoading] = useState(false);
+
+
+  const handleDatasetChange = (e) => {
+    setDataset(e.target.value);
+  };
 
   const handleImageChange = (e) => {
     setSelectedImage(e.target.files[0]);
@@ -43,6 +65,21 @@ const ImageUpload = () => {
   return (
     <div className="upload-section">
       <h2>Test The Model</h2>
+
+      {/* Dataset dropdown */}
+      <div className="dataset-select">
+        <label htmlFor="dataset-dropdown">Dataset:</label>
+        <select
+          id="dataset-dropdown"
+          value={dataset}
+          onChange={handleDatasetChange}
+        >
+          <option value="pneumonia">Chest X‑ray Pneumonia</option>
+          <option value="brainTumor">Brain Tumor MRI</option>
+          {/* add more as needed */}
+        </select>
+      </div>
+
       <div className="upload-actions">
         <label className="custom-file-upload">
           <input type="file" accept="image/*" onChange={handleImageChange} />
