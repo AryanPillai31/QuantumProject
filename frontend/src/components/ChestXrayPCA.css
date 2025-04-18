@@ -239,22 +239,3 @@
     align-items: center;
   }
 }
-.dataset-selector {
-  margin-bottom: 1.5rem;
-  text-align: left;
-}
-
-.dataset-selector label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #444;
-}
-
-.dataset-dropdown {
-  width: 100%;
-  padding: 0.5rem;
-  border: 2px solid #aaa;
-  border-radius: 6px;
-  font-size: 1rem;
-}

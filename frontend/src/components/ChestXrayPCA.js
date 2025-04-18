@@ -6,8 +6,6 @@ export default function ChestXrayPCA() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [selectedDataset, setSelectedDataset] = useState("chest_xray");
-  const handleDatasetChange                   = e => setSelectedDataset(e.target.value);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -18,16 +16,12 @@ export default function ChestXrayPCA() {
   };
 
   const handleAnalyze = () => {
-    if (!preview) return;
+    // Simulate the PCA + QSVM processing
     setLoading(true);
     setTimeout(() => {
+      // After some mock processing time, stop loading
       setLoading(false);
-      if (selectedDataset === "chest_xray") {
-        runChestXrayAnalysis(image);
-      } else {
-        runBrainMRIAnalysis(image);
-      }
-      alert("PCA + QSVM Analysis Complete!");
+      alert("PCA + QSVM Analysis Complete! Check console or logs.");
     }, 2000);
   };
 
@@ -101,19 +95,6 @@ export default function ChestXrayPCA() {
         <div className="analysis-container">
           <div className="analysis-card">
             {/* Upload Section */}
-            <div className="dataset-selector">
-              <label htmlFor="dataset">Choose Dataset:</label>
-              <select
-                id="dataset"
-                value={selectedDataset}
-                onChange={handleDatasetChange}
-                className="dataset-dropdown"
-              >
-                <option value="chest_xray">Chest X‑ray (Pneumonia)</option>
-                <option value="brain_mri">Brain MRI (Tumor)</option>
-              </select>
-            </div>
-
             <label className="upload-box">
               <Upload className="upload-icon" />
               <span className="upload-text">Click or drag to upload a Chest X-ray image</span>

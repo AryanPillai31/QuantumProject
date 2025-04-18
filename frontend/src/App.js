@@ -6,8 +6,7 @@ import ImageSection from './components/ImageSection';
 import About from './components/About';
 import Dataset from './components/Dataset';
 import Workflow from './components/workflow';
-import ChestXrayPCA from "./components/ChestXrayPCA";
-// import ImageUpload from './components/ImageUpload';
+import ImageUpload from './components/ImageUpload';
 import ZZFeatureMap from './components/ZZFeatureMap';
 
 
@@ -24,7 +23,7 @@ function App() {
       <Dataset />
       <Workflow />
       <ZZFeatureMap />
-      <ChestXrayPCA/>
+      <ImageUpload />
     </div>
   );
 }

@@ -3,8 +3,13 @@ import './ImageUpload.css';
 
 const ImageUpload = () => {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [dataset, setDataset] = useState('pneumonia'); // ← new state
   const [prediction, setPrediction] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleDatasetChange = (e) => {
+    setDataset(e.target.value);
+  };
 
   const handleImageChange = (e) => {
     setSelectedImage(e.target.files[0]);
@@ -17,6 +22,7 @@ const ImageUpload = () => {
     setLoading(true);
     const formData = new FormData();
     formData.append('file', selectedImage);
+    formData.append('dataset', dataset); // ← include dataset
 
     try {
       const response = await fetch('http://localhost:5000/predict', {
@@ -36,22 +42,41 @@ const ImageUpload = () => {
   return (
     <div className="upload-section">
       <h2>Test The Model</h2>
+
+      {/* Dataset dropdown */}
+      <div className="dataset-select">
+        <label htmlFor="dataset-dropdown">Dataset:</label>
+        <select
+          id="dataset-dropdown"
+          value={dataset}
+          onChange={handleDatasetChange}
+        >
+          <option value="pneumonia">Chest X‑ray Pneumonia</option>
+          <option value="brainTumor">Brain Tumor MRI</option>
+          {/* add more as needed */}
+        </select>
+      </div>
+
       <div className="upload-actions">
         <label className="custom-file-upload">
-            <input type="file" accept="image/*" onChange={handleImageChange} />
-        📁 Choose File
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+          📁 Choose File
         </label>
-            {selectedImage && <span className="file-name">{selectedImage.name}</span>}
-  
-         <button onClick={handleClassify} disabled={!selectedImage || loading}>
-            {loading ? 'Classifying...' : 'Classify'}
+        {selectedImage && (
+          <span className="file-name">{selectedImage.name}</span>
+        )}
+
+        <button
+          onClick={handleClassify}
+          disabled={!selectedImage || loading}
+        >
+          {loading ? 'Classifying...' : 'Classify'}
         </button>
-        </div>
-
-      
-
-
-      
+      </div>
 
       {selectedImage && (
         <div className="preview">
