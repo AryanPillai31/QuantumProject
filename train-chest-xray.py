@@ -8,7 +8,6 @@ from pymongo import MongoClient
 from qiskit.utils import algorithm_globals
 from qiskit_machine_learning.kernels import QuantumKernel
 from qiskit.circuit.library import ZZFeatureMap
-from qiskit.algorithms.optimizers import COBYLA
 from qiskit_machine_learning.algorithms import QSVC
 from qiskit.primitives import Sampler
 
